@@ -25,52 +25,48 @@ six==1.10.0
 
 Installation
 ------------
-Install pew (python environment wrapper)
+Install `pew` (python environment wrapper)
 ```
 pip2 install pew
 ```
 
 Create dirs
 ```
-mkdir -p /data/pew/{virtualenvs,flapjack_queues}
+mkdir -p /data/pew/virtualenvs
+mkdir -p /etc/flapjack_queues
 mkdir -p /var/log/flapjack_queues
 ```
 
-Create a new virtualenv for flapjack_queues.py
+Clone repo
+```
+git clone https://fqdn/username/flapjack_queues.git /data/pew/flapjack_queues
+cd /data/pew/flapjack_queues
+```
+
+Create a new virtualenv for `flapjack_queues`
 ```
 WORKON_HOME="/data/pew/virtualenvs" pew new -a /data/pew/flapjack_queues -r requirements.txt flapjack_queues
 ```
 
-Enter virtualenv
+Enter virtualenv (previous commad will enter virtualenv at the end)
 ```
 WORKON_HOME=/data/pew/virtualenvs pew workon flapjack_queues
 ```
 
-
-Supervisor configuration file `/etc/supervisor/conf.d/flapjack_queues.conf`
+Copy and modify `flapjack_queues` configuration file
 ```
-[program:flapjack_queues]
-command=/data/pew/%(program_name)s/%(program_name)s.py -C /data/pew/%(program_name)s/%(program_name)s.json -a 0.0.0.0 -p 8080
-numprocs=1
-autostart=true
-autorestart=true
-startsecs=3
-startretries=3
-;environment=PATH="/data/pew/virtualenvs/%(program_name)s/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",HOME="/data/pew/%(program_name)s",WORKON_HOME="/data/pew/virtualenvs"
-environment=PATH="/data/pew/virtualenvs/%(program_name)s/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",HOME="/data/pew/%(program_name)s"
-priority=999
-directory=/data/pew/%(program_name)s
-user=root
-redirect_stderr=true
-stdout_logfile_maxbytes=100MB
-stdout_logfile_backups=10
-stdout_logfile=/var/log/%(program_name)s/%(program_name)s.log
+cp /data/pew/flapjack_queues/flapjack_queues.json /etc/flapjack_queues/flapjack_queues.json
+```
+
+Copy and modify `supervisor` configuration file
+```
+cp /data/pew/flapjack_queues/supervisor/flapjack_queues.conf /etc/supervisor/conf.d/flapjack_queues.conf
 ```
 
 Add and start service
 ```
+supervisorctl reread
 supervisorctl add flapjack_queues
-supervisorctl update flapjack_queues
 ```
 
 Configuration
