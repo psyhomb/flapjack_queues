@@ -69,6 +69,14 @@ supervisorctl reread
 supervisorctl add flapjack_queues
 ```
 
+or
+
+Docker build and run
+```
+docker build . -t flapjack_queues:0.1
+docker run -itd --name flapjack_queues -p 8080:8080 flapjack_queues:0.1
+```
+
 Configuration
 -------------
 JSON configuration file example
