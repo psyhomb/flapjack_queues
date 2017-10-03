@@ -4,8 +4,8 @@ flapjack_queues mini HTTP API
 About
 -----
 This API exposes some interesting features that regular Flapjack API doesn't have
-  - Watch length of `events`, `notifications` and `email_notifications` queues
-  - See events that are still in the queue
+  - Print length of `events`, `notifications` and `email_notifications` queues
+  - Show events that are still in the queue
   - Purge any of the mentioned queues if any of them is overflowed with events
   - Permanently delete all checks for named entity (current Flapjack API on version 1.6 will allow you only to disable checks)
   - Push events directly to `events` queue on master Redis
@@ -13,7 +13,7 @@ This API exposes some interesting features that regular Flapjack API doesn't hav
 
 Requirements
 ------------
-This API requires python2.7 and some additional modules that are specified in the requirements.txt file:
+This API requires python2.7 and some additional modules that are specified in the `requirements.txt` file:
 
 ```
 bottle==0.12.9
@@ -25,6 +25,9 @@ six==1.10.0
 
 Installation
 ------------
+
+#### Supervisor
+
 Install `pew` (python environment wrapper)
 ```
 pip2 install pew
@@ -39,7 +42,7 @@ mkdir -p /var/log/flapjack_queues
 
 Clone repo
 ```
-git clone https://fqdn/username/flapjack_queues.git /data/pew/flapjack_queues
+git clone https://<fqdn>/<username>/flapjack_queues.git /data/pew/flapjack_queues
 cd /data/pew/flapjack_queues
 ```
 
@@ -69,20 +72,21 @@ supervisorctl reread
 supervisorctl add flapjack_queues
 ```
 
-or
+#### Docker
 
 Docker build and run
 ```
-docker build . -t flapjack_queues:0.1
-docker run -itd --name flapjack_queues -p 8080:8080 flapjack_queues:0.1
+docker build -t flapjack_queues .
+docker run -itd --name flapjack_queues -p 8080:8080 flapjack_queues
 ```
+
 
 Configuration
 -------------
 JSON configuration file example
 
-**Note**: master_node has precedence over sentinels, in other words
-      if you define redis master node explicitly program will not use discover method (will ignore sentinels and master_group)
+**Note**: `master_node` has precedence over sentinels, in other words
+      if you define redis master node explicitly program will not use discover method (will ignore sentinels and `master_group`)
 
 Auto-discover redis master node:
 ```json
@@ -130,51 +134,52 @@ Configuration with explicitly defined redis master node:
 
 Usage
 -----
+
 Client side (requests):
 
 Show length of all queues
 ```
-curl -s '127.0.0.1:8080/queues' | jq .
+curl -s 'http://127.0.0.1:8080/queues' | jq .
 ```
 
-Show lenght of specific queue
+Show lenght of designated queue
 ```
-curl -s '127.0.0.1:8080/queue/events' | jq .
+curl -s 'http://127.0.0.1:8080/queue/events' | jq .
 ```
 
 Show content of the first event
 ```
-curl -s '127.0.0.1:8080/queue/events?start=0&stop=0' | jq .
+curl -s 'http://127.0.0.1:8080/queue/events?start=0&stop=0' | jq .
 ```
 
 Show content of the last event
 ```
-curl -s '127.0.0.1:8080/queue/events?start=-1&stop=-1' | jq .
+curl -s 'http://127.0.0.1:8080/queue/events?start=-1&stop=-1' | jq .
 ```
 
 Show content of the last two events
 ```
-curl -s '127.0.0.1:8080/queue/events?start=-2&stop=-1' | jq .
+curl -s 'http://127.0.0.1:8080/queue/events?start=-2&stop=-1' | jq .
 ```
 
-Delete/Empty `notifications` queue
+Delete/Purge `notifications` queue
 ```
-curl -s -X DELETE 127.0.0.1:8080/queue/notifications
+curl -s -X DELETE 'http://127.0.0.1:8080/queue/notifications'
 ```
 
 Delete entity
 ```
-curl -s -X DELETE 127.0.0.1:8080/entity/foo.example.com
+curl -s -X DELETE 'http://127.0.0.1:8080/entity/foo.example.com'
 ```
 
-Create a new event in `events` queue
+Create a new event in the `events` queue
 ```
-curl -s -X POST -H 'Content-Type: application/json' --data-binary '@/path/to/event.json' 127.0.0.1:8080/queue/events
+curl -s -X POST -H 'Content-Type: application/json' --data '@/path/to/event.json' 'http://127.0.0.1:8080/queue/events'
 ```
 
 event.json:
 
-**Note**: All keys are required
+**Note**: All keys are mandatory
 ```json
 {
   "entity": "test.example.com",
@@ -192,6 +197,7 @@ event.json:
   "repeat_failure_delay": 120
 }
 ```
+
 
 License and Authors
 -------------------
