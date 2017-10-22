@@ -196,10 +196,39 @@ class RedisMaster:
 
 def main():
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-  parser.add_argument('-C', '--config', help='Path to the configuration file', dest='config', action='store', required=True)
-  parser.add_argument('-a', '--bind-addr', help='Web server bind IP', default='127.0.0.1', dest='bind_addr', action='store')
-  parser.add_argument('-p', '--bind-port', help='Web server bind port', default=8080, type=int, dest='bind_port', action='store')
-  parser.add_argument('-w', '--workers', help='Number of web server workers', default=5, type=int, dest='workers', action='store')
+  parser.add_argument(
+    '-C', '--config',
+    help='Path to the configuration file',
+    dest='config',
+    action='store',
+    required=True
+  )
+
+  parser.add_argument(
+    '-a', '--bind-addr',
+    help='Web server bind IP',
+    default='127.0.0.1',
+    dest='bind_addr',
+    action='store'
+  )
+
+  parser.add_argument(
+    '-p', '--bind-port',
+    help='Web server bind port',
+    default=8080,
+    type=int,
+    dest='bind_port',
+    action='store'
+  )
+
+  parser.add_argument(
+    '-w', '--workers',
+    help='Number of web server workers',
+    default=5,
+    type=int,
+    dest='workers',
+    action='store'
+  )
 
   args = parser.parse_args()
 
@@ -237,7 +266,12 @@ def main():
           except ValueError as e:
             abort(400, 'Bad Request - %s' % e)
 
-          return rdb.lrange(name[0], start, stop)
+          return {
+            name[0]: [
+              json.loads(e)
+              for e in rdb.lrange(name[0], start, stop)
+            ]
+          }
 
     for n in name:
       output['flapjack']['queues'][n] = rdb.llen(n)
